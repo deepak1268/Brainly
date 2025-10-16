@@ -18,7 +18,7 @@ const linkSchema = new Schema({
     }
 })
 
-const contentTypes = ["audio","video","article","image"]
+const contentTypes = ["tweet","video","documnet","link"]
 const contentSchema = new Schema({
     title: {type: String, required: true},
     type: {type: String, enum: contentTypes, required: true},

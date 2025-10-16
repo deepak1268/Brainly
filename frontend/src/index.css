@@ -1,0 +1,11 @@
+@import "tailwindcss";
+.tweet-scroll-hidden {
+  max-height: 300px;
+  overflow-y: auto;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.tweet-scroll-hidden::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}
