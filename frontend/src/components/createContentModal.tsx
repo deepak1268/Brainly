@@ -1,44 +1,128 @@
-// import { useState } from "react";
+import { useState } from "react";
 import { CrossIcon } from "../icons/CrossIcon";
 import { InputBox } from "./InputBox";
 import { Button } from "./button";
+import axios from "axios";
+import { BACKEND_URL } from "../config";
 
-export const CreateContentModal = ({open,onClose} : {open: Boolean,onClose: () => void}) => {
+enum ContentType {
+  Youtube = "video",
+  Twitter = "tweet",
+  Document = "document",
+  Link = "link",
+}
 
-    // const [content,setContent] = useState({
-    //     title: "",
-    //     link: "",
-    //     type: "",
-    //     tags: ""
-    // })
+export const CreateContentModal = ({open,onClose,}: {open: Boolean; onClose: () => void;}) => {
+  const [content, setContent] = useState({
+    title: "",
+    link: "",
+    tags: "",
+  });
+  const [type, setType] = useState(ContentType.Youtube);
+  const [loading,setLoading] = useState(false)
+
+  async function submitContent(){
+    setLoading(true)
+    try{
+      const token = localStorage.getItem("token");
+      const tags = content.tags.trim().split(" ");
+      console.log(type)
+      await axios.post(`${BACKEND_URL}/api/v1/content`,{
+        title: content.title,
+        link: content.link,
+        tags,
+        type 
+      },{
+        headers:{
+          token
+        }
+      })
+      location.reload()
+      alert("Content Added")
+    }catch(err){
+      console.error(err)
+      alert("Some error occured")
+    } finally{
+      setLoading(false)
+    }
+  }
+
   return (
     <div>
       {open && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-lg">
+        <div className="fixed inset-0 flex justify-center items-center bg-black/50 z-50">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-xl">
+
             <div className="flex justify-end cursor-pointer" onClick={onClose}>
               <CrossIcon />
             </div>
+
+            <div className="flex flex-col gap-4">
+              <InputBox
+                text="Title"
+                value={content.title}
+                onChange={(e) =>
+                  setContent({ ...content, title: e.target.value })
+                }
+                placeholder="Enter The Title"
+              />
+              <InputBox
+                text="Link"
+                value={content.link}
+                onChange={(e) =>
+                  setContent({ ...content, link: e.target.value })
+                }
+                placeholder="Enter The Link"
+              />
+              <InputBox 
+                text="Tags"
+                value={content.tags}
+                onChange={(e) => 
+                  setContent({...content,tags: e.target.value})
+                }
+                placeholder="Ex:- #Productivity #Growth"></InputBox>
+
+              <div>
+                <div className="font-medium text-lg mb-2">Type</div>
+                <div className="flex justify-between">
+                  <Button
+                    text="Youtube"
+                    variant={
+                      type === ContentType.Youtube ? "primary" : "secondary"
+                    }
+                    onClick={() => setType(ContentType.Youtube)}
+                  ></Button>
+                  <Button
+                    text="Twitter"
+                    variant={
+                      type === ContentType.Twitter ? "primary" : "secondary"
+                    }
+                    onClick={() => setType(ContentType.Twitter)}
+                  ></Button>
+                  <Button
+                    text="Document"
+                    variant={
+                      type === ContentType.Document ? "primary" : "secondary"
+                    }
+                    onClick={() => setType(ContentType.Document)}
+                  ></Button>
+                  <Button
+                    text="Any Other Link"
+                    variant={
+                      type === ContentType.Link ? "primary" : "secondary"
+                    }
+                    onClick={() => setType(ContentType.Link)}
+                  ></Button>
+                </div>
+
+              </div>
+
+            </div>
+
             <br />
-            <InputBox placeholder="Enter The Title"  />
-            <InputBox placeholder="Enter The Link"  />
-            <InputBox placeholder="Enter The Link"  />
-            <InputBox placeholder="Enter The Tags"></InputBox>
-            {/* <div>
-              <label className="block mb-2 text-gray-700">Select Type:</label>
-              <select
-                value={content.type}
-                onChange={(e) => setContent((prevVal => (prevVal.type = e.target.value)))}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">-- Select --</option>
-                <option value="tweet">Tweet</option>
-                <option value="video">Video</option>
-                <option value="article">Article</option>
-              </select>
-            </div> */}
-            <br />
-            <Button variant="secondary" text="Add Content" fullWidth={true}></Button>
+
+            <Button disabled={loading} variant="secondary" text="Add Content" fullWidth={true} onClick={submitContent}/>
+
           </div>
         </div>
       )}

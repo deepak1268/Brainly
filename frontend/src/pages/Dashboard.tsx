@@ -4,23 +4,54 @@ import { PlusIcon } from "../icons/PlusIcon";
 import { ShareIcon } from "../icons/ShareIcon";
 import { Card } from "../components/card";
 import { CreateContentModal } from "../components/createContentModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { BACKEND_URL } from "../config";
+
+interface ContentItem{
+  title: string;
+  type: string;
+  link: string;
+  tags: string[];
+}
 
 export const Dashboard = () => {
   const [modalOpen,setModalOpen] = useState(false);
-  const tags = ["#productivity","#growth"];
+  const [loading,setLoading] = useState(false)
+  const [content,setContent] = useState<ContentItem[]>([]);
+
+  useEffect(()=>{
+    async function fetchContent(){
+      setLoading(true);
+      try{
+        const token = localStorage.getItem("token");
+        const res = await axios.get(`${BACKEND_URL}/api/v1/content`,{
+          headers: {
+            token
+          }
+        })
+        setContent(res.data.content);
+      } catch(err){
+        console.error(err)
+        alert("Some error occured while loading dashboard.")
+      } finally{
+        setLoading(false)
+      }
+    }
+    fetchContent();
+  },[])
   
   return (
-    <div className="flex h-screen">
+    <div className="bg-gray-100 flex min-h-screen">
 
       <CreateContentModal open={modalOpen} onClose={() => setModalOpen(false)}/>
 
       <SideBar />
       
-      <div className="bg-gray-100 flex-grow px-10 py-8 ml-70">
+      <div className="flex-grow px-10 py-8 ml-70">
 
         {/* top header  */}
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center p-5">
           <div className="text-3xl font-semibold">
             All Notes
           </div>
@@ -41,22 +72,25 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* content */}
-        <div className="grid grid-cols-3 gap-4 mt-20">
-          <Card title="Project Ideas" type="tweet" tags={tags} link="https://x.com/piyushgarg_dev/status/1978748632653312193"/>
-          <Card title="First Video" type="video" tags={tags} link="https://www.youtube.com/watch?v=So7lVjQl0wI"></Card>
-          <Card title="First Video" type="video" tags={tags} link="https://www.youtube.com/watch?v=So7lVjQl0wI"></Card>
-          <Card title="First Video" type="video" tags={tags} link="https://www.youtube.com/watch?v=So7lVjQl0wI"></Card>
-          <Card title="First Video" type="video" tags={tags} link="https://www.youtube.com/watch?v=So7lVjQl0wI"></Card>
-          <Card title="First Video" type="video" tags={tags} link="https://www.youtube.com/watch?v=So7lVjQl0wI"></Card>
-          <Card title="First Video" type="video" tags={tags} link="https://www.youtube.com/watch?v=So7lVjQl0wI"></Card>
-          <Card title="First Video" type="video" tags={tags} link="https://www.youtube.com/watch?v=So7lVjQl0wI"></Card>
-          <Card title="First Video" type="video" tags={tags} link="https://www.youtube.com/watch?v=So7lVjQl0wI"></Card>
-          <Card title="First Video" type="video" tags={tags} link="https://www.youtube.com/watch?v=So7lVjQl0wI"></Card>
-          <Card title="First Video" type="video" tags={tags} link="https://www.youtube.com/watch?v=So7lVjQl0wI"></Card>
-          <Card title="First Video" type="video" tags={tags} link="https://www.youtube.com/watch?v=So7lVjQl0wI"></Card>
-          <Card title="First Video" type="video" tags={tags} link="https://www.youtube.com/watch?v=So7lVjQl0wI"></Card>
+        <div className="bg-gray-200 h-1">
+
         </div>
+
+        {/* content */}
+        {loading ? "Loading..." : 
+          <div className="grid grid-cols-3 gap-x-4 gap-y-8 mt-10">
+            {content.length <= 0 ? "You dont't have any content." :
+              (content.map((con) => (
+                <Card
+                  title={con.title}
+                  type={con.type}
+                  link={con.link}
+                  tags={con.tags}
+                />
+              )))
+            }
+          </div>
+        }
 
       </div>
 

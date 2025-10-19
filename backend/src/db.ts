@@ -18,12 +18,12 @@ const linkSchema = new Schema({
     }
 })
 
-const contentTypes = ["tweet","video","documnet","link"]
+const contentTypes = ["tweet","video","document","link"]
 const contentSchema = new Schema({
     title: {type: String, required: true},
     type: {type: String, enum: contentTypes, required: true},
     link: {type: String, required: true},
-    tags: [{type: Schema.Types.ObjectId, ref: "tags"}],
+    tags: [], // {type: Schema.Types.ObjectId, ref: "tags"} => try implementing later
     userId: {type: Schema.Types.ObjectId, ref: "users", required: true}
 })
 

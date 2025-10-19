@@ -6,10 +6,12 @@ import { ContentModel, LinkModel, UserModel } from "./db.js";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import { userAuth } from "./middleware.js";
+import cors from "cors";
+import { JWT_USER_SECRET } from "./config.js";
 
-const JWT_USER_SECRET = "deepak";
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 app.post("/api/v1/signup", async (req, res) => {
   const requiredBody = z.object({
@@ -73,7 +75,7 @@ app.post("/api/v1/signin", async (req, res) => {
           {
             userId: user._id,
           },
-          JWT_USER_SECRET
+          JWT_USER_SECRET as string
         );
         res.status(200).send({
           token,
@@ -120,7 +122,7 @@ app.get("/api/v1/content", userAuth, async (req, res) => {
     const content = await ContentModel.find({
       userId,
     }).populate("userId", "username");
-    return res.status(200).send(content);
+    return res.status(200).json({content});
   } catch (err) {
     return res.status(500).json({
       message: "Error while fetching content",
