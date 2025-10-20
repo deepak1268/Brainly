@@ -7,8 +7,9 @@ import { CreateContentModal } from "../components/createContentModal";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { BACKEND_URL } from "../config";
+import { ShareBrainModal } from "../components/ShareBrainModal";
 
-interface ContentItem{
+export interface ContentItem{
   title: string;
   type: string;
   link: string;
@@ -19,6 +20,8 @@ export const Dashboard = () => {
   const [modalOpen,setModalOpen] = useState(false);
   const [loading,setLoading] = useState(false)
   const [content,setContent] = useState<ContentItem[]>([]);
+  const [shareOpen,setShareOpen] = useState(false);
+  const [link,setLink] = useState("")
 
   useEffect(()=>{
     async function fetchContent(){
@@ -40,12 +43,33 @@ export const Dashboard = () => {
     }
     fetchContent();
   },[])
+
+  async function shareLink(){
+    try{
+      const token = localStorage.getItem("token")
+      setShareOpen(true)
+      const res = await axios.post(`${BACKEND_URL}/api/v1/brain/share`,{
+        share: true
+      },{
+        headers: {
+          token
+        }
+      })
+      console.log(res.data)
+      console.log(res.data.hash)
+      setLink(res.data.hash)
+    } catch(err){
+      console.error(err)
+      alert("Some error occured.")
+    }
+  }
   
   return (
     <div className="bg-gray-100 flex min-h-screen">
 
-      <CreateContentModal open={modalOpen} onClose={() => setModalOpen(false)}/>
-
+      {modalOpen && <CreateContentModal onClose={() => setModalOpen(false)}/>}
+      {shareOpen && <ShareBrainModal onClose={() => setShareOpen(false)} link={link}/>
+}
       <SideBar />
       
       <div className="flex-grow px-10 py-8 ml-70">
@@ -60,7 +84,7 @@ export const Dashboard = () => {
             <Button
               variant="primary"
               text="Share Brain"
-              onClick={() => {}}
+              onClick={shareLink}
               startIcon={<ShareIcon/>}
             />
             <Button
@@ -80,8 +104,9 @@ export const Dashboard = () => {
         {loading ? "Loading..." : 
           <div className="grid grid-cols-3 gap-x-4 gap-y-8 mt-10">
             {content.length <= 0 ? "You dont't have any content." :
-              (content.map((con) => (
+              (content.map((con,idx) => (
                 <Card
+                  key={idx}
                   title={con.title}
                   type={con.type}
                   link={con.link}

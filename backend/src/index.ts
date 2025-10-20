@@ -197,7 +197,7 @@ app.get("/api/v1/brain/share/:hash", async (req, res) => {
     const content = await ContentModel.find({
       userId: link.userId,
     }).populate("userId", "username");
-    return res.status(200).send(content);
+    return res.status(200).json({content});
   } catch (err) {
     return res.status(500).send({
       message: "Internal server error",
