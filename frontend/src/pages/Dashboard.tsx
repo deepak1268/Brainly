@@ -55,8 +55,6 @@ export const Dashboard = () => {
           token
         }
       })
-      console.log(res.data)
-      console.log(res.data.hash)
       setLink(res.data.hash)
     } catch(err){
       console.error(err)
@@ -68,8 +66,8 @@ export const Dashboard = () => {
     <div className="bg-gray-100 flex min-h-screen">
 
       {modalOpen && <CreateContentModal onClose={() => setModalOpen(false)}/>}
-      {shareOpen && <ShareBrainModal onClose={() => setShareOpen(false)} link={link}/>
-}
+      {shareOpen && <ShareBrainModal onClose={() => setShareOpen(false)} link={link}/>}
+      
       <SideBar />
       
       <div className="flex-grow px-10 py-8 ml-70">
